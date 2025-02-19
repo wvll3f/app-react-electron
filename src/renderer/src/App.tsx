@@ -1,18 +1,34 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CreateMacro from './components/CreateMacro'
 import ItemMacro from './components/ItemMacro'
 import TopBar from './components/TopBar'
+import { Bounce, toast, ToastContainer } from 'react-toastify'
+
+type Macro = {
+  id: number
+  nome: string
+  descricao: string
+}
 
 function App(): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [itemsMacro, setItemsMacro] = useState<string | null>(null)
   const [statusMacro, setStatusMacro] = useState<boolean>(false)
+  const [macro, setMacro] = useState<Macro[] | null>(null)
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const ipcHandle = (): Promise<void> =>
+      window.electron.ipcRenderer.invoke('get-macros').then(setMacro).catch(console.error)
+    console.log(macro)
+  }, [])
 
   const newMacro = (): void => {
     setStatusMacro((prev) => !prev)
     setItemsMacro('ss')
   }
   const onSubmit = (): void => {
+    toast('Macro criado com sucesso!')
     setStatusMacro((prev) => !prev)
   }
   const onCancel = (): void => {
@@ -36,6 +52,19 @@ function App(): JSX.Element {
         ) : (
           <CreateMacro sts={statusMacro} onSubmit={onSubmit} onCancel={onCancel} />
         )}
+        <ToastContainer
+          position="bottom-right"
+          autoClose={1000}
+          hideProgressBar={true}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          transition={Bounce}
+        />
       </div>
     </div>
   )

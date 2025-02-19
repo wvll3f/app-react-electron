@@ -2,12 +2,17 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { createTable, getAllMacro, getMacroById } from './db/db'
+
+type requestMessage = {
+  title: string
+  message: string
+}
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    maxWidth: 720,
     show: false,
     frame: false,
     autoHideMenuBar: true,
@@ -35,8 +40,9 @@ function createWindow(): void {
 
   ipcMain.on('close-window', () => mainWindow.close())
   ipcMain.on('minimize-window', () => mainWindow.minimize())
-  ipcMain.on('maximize-window', (event, res) => mainWindow.setFullScreen(res))
-  ipcMain.on('on-top-window', (event, res) => mainWindow.setAlwaysOnTop(res))
+  ipcMain.on('maximize-window', (_event, res) => mainWindow.setFullScreen(res))
+  ipcMain.on('on-top-window', (_event, res) => mainWindow.setAlwaysOnTop(res))
+  ipcMain.handle('get-macros', async () => getAllMacro())
 }
 
 app.whenReady().then(() => {
@@ -48,6 +54,7 @@ app.whenReady().then(() => {
 
   ipcMain.on('ping', () => console.log('pong'))
   createWindow()
+  createTable()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
