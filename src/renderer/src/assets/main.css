@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+button {
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  outline: none;
+  border: none;
+}
+
+input, textarea {
+  -webkit-app-region: no-drag;
+}
+
+#main-container {
+  -webkit-app-region: drag;
+}
+
+#list-macros {
+  -webkit-app-region: no-drag;
+}
+
+#minimize-btn {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
