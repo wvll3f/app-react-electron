@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import CreateMacro from './components/CreateMacro'
 import ItemMacro from './components/ItemMacro'
@@ -17,10 +18,13 @@ function App(): JSX.Element {
   const [macro, setMacro] = useState<Macro[] | null>(null)
 
   useEffect(() => {
+    console.log('ola')
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const ipcHandle = (): Promise<void> =>
+    const ipcHandle = (): void => {
       window.electron.ipcRenderer.invoke('get-macros').then(setMacro).catch(console.error)
-    console.log(macro)
+      console.log(macro)
+    }
+    ipcHandle()
   }, [])
 
   const newMacro = (): void => {

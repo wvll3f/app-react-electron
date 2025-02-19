@@ -1,21 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path'
 import sqlite3 from 'sqlite3'
 
-type Macro = {
-  id: number
-  nome: string
-  descricao: string
+type requestMacro = {
+  title: string
+  message: string
 }
 
 const dbPath = path.resolve(__dirname, 'macro.db')
-export const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco de dados', err)
-  } else {
-    console.log('Conectado ao banco de dados SQLite')
-    createTable()
-  }
-})
 
 export function createTable(): void {
   const query = `
@@ -36,9 +28,18 @@ export function createTable(): void {
   })
 }
 
-export function getAllMacro(): Promise<Macro[]> {
+export const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Erro ao conectar ao banco de dados', err)
+  } else {
+    console.log('Conectado ao banco de dados SQLite')
+    createTable()
+  }
+})
+
+export function getAllMacro(): Promise<any> {
   return new Promise((resolve, reject) => {
-    db.all<Macro>('SELECT * FROM macro', [], (err, rows) => {
+    db.all<any>('SELECT * FROM macro', [], (err, rows) => {
       if (err) {
         reject(err.message)
       } else {
@@ -48,25 +49,23 @@ export function getAllMacro(): Promise<Macro[]> {
   })
 }
 
-export const getMacroById = async (id): Promise<Macro> => {
+export const getMacroById = async (id): Promise<any> => {
   const sql = 'SELECT * FROM macro WHERE id = ?'
-  return new Promise<Macro>((resolve, reject) => {
-    db.get<Macro>(sql, id, (err, row) => {
+  return new Promise<any>((resolve, reject) => {
+    db.get(sql, id, (err, row) => {
       if (err) reject(err)
       resolve(row)
     })
   })
 }
 
-export function insertMacro(title, message): string {
-  if (!title || title == null || title == undefined) {
-    throw new Error('O titulo é obrigatorio')
+export function insertMacro({ title, message }: requestMacro): void {
+  if (!title) {
+    throw new Error('O título é obrigatório')
   }
-  if (!message || message == null || message == undefined) {
-    throw new Error('A menssagem é obrigatoria')
+  if (!message) {
+    throw new Error('A mensagem é obrigatória')
   }
-  db.run('INSERT INTO macro (title, mensage, createdAt) VALUES (?, ?, ?)', [title, message])
-  return 'ok'
+  db.run('INSERT INTO macro (title, message) VALUES (?, ?)', [title, message])
 }
 
-module.exports = { db, createTable, getAllMacro, insertMacro }
