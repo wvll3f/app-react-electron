@@ -7,31 +7,50 @@ import { Bounce, toast, ToastContainer } from 'react-toastify'
 
 type Macro = {
   id: number
-  nome: string
-  descricao: string
+  title: string
+  message: string
 }
+type resquestMacro = {
+  title: string
+  message: string
+}
+
 
 function App(): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [itemsMacro, setItemsMacro] = useState<string | null>(null)
   const [statusMacro, setStatusMacro] = useState<boolean>(false)
   const [macro, setMacro] = useState<Macro[] | null>(null)
+  const [mesagem, setMensagem] = useState('')
 
   useEffect(() => {
-    console.log('ola')
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ipcHandle = (): void => {
       window.electron.ipcRenderer.invoke('get-macros').then(setMacro).catch(console.error)
-      console.log(macro)
     }
     ipcHandle()
+    console.log(macro?.length)
+    console.log(macro)
   }, [])
 
   const newMacro = (): void => {
     setStatusMacro((prev) => !prev)
     setItemsMacro('ss')
   }
-  const onSubmit = (): void => {
+  const onSubmit = (title, message): void => {
+    const query = {
+      title: title,
+      message: message
+    }
+    window.electron.ipcRenderer.send('add-macro', query)
+
+    window.electron.ipcRenderer.once("add-macro-response", (_event, response) => {
+      if (response.success) {
+        setMensagem(`Macro adicionada com sucesso! ID: ${response.id}`);
+      } else {
+        setMensagem(`Erro: ${response.error}`);
+      }
+    });
     toast('Macro criado com sucesso!')
     setStatusMacro((prev) => !prev)
   }
@@ -52,10 +71,17 @@ function App(): JSX.Element {
       </div>
       <div id="container-macros" className="">
         {!statusMacro ? (
-          <ItemMacro title="Boas Vindas" id={5} />
-        ) : (
-          <CreateMacro sts={statusMacro} onSubmit={onSubmit} onCancel={onCancel} />
-        )}
+          macro?.length ?
+            macro.map((m) => (
+              <div key={m.id}>
+                <ItemMacro title={m.title} id={m.id} />
+              </div>
+            ))
+            :
+            <p>Nenhum macro encontrado</p>)
+          : (
+            <CreateMacro sts={statusMacro} onSubmit={onSubmit} onCancel={onCancel} />
+          )}
         <ToastContainer
           position="bottom-right"
           autoClose={1000}
