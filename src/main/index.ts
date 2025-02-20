@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { db, createTable, getAllMacro } from './db/db'
+import { db, createTable, getAllMacro, getMacroById } from './db/db'
 
 function createWindow(): void {
   // Create the browser window.
@@ -39,6 +39,7 @@ function createWindow(): void {
   ipcMain.on('maximize-window', (_event, res) => mainWindow.setFullScreen(res))
   ipcMain.on('on-top-window', (_event, res) => mainWindow.setAlwaysOnTop(res))
   ipcMain.handle('get-macros', async () => getAllMacro())
+  ipcMain.handle('get-macro-id', async (_event, id) => getMacroById(id))
   ipcMain.on('add-macro', (event, macro) => {
     const { title, message } = macro
 

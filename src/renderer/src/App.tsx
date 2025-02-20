@@ -1,20 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import CreateMacro from './components/CreateMacro'
 import ItemMacro from './components/ItemMacro'
 import TopBar from './components/TopBar'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
+import EditMacro from './components/EditMacro'
 
 type Macro = {
   id: number
   title: string
   message: string
 }
-type resquestMacro = {
-  title: string
-  message: string
-}
-
 
 function App(): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -23,14 +18,11 @@ function App(): JSX.Element {
   const [macro, setMacro] = useState<Macro[] | null>(null)
   const [mesagem, setMensagem] = useState('')
 
+  const getMacros = (): void => {
+    window.electron.ipcRenderer.invoke('get-macros').then(setMacro).catch(console.error)
+  }
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const ipcHandle = (): void => {
-      window.electron.ipcRenderer.invoke('get-macros').then(setMacro).catch(console.error)
-    }
-    ipcHandle()
-    console.log(macro?.length)
-    console.log(macro)
+    getMacros()
   }, [])
 
   const newMacro = (): void => {
@@ -44,15 +36,16 @@ function App(): JSX.Element {
     }
     window.electron.ipcRenderer.send('add-macro', query)
 
-    window.electron.ipcRenderer.once("add-macro-response", (_event, response) => {
+    window.electron.ipcRenderer.once('add-macro-response', (_event, response) => {
       if (response.success) {
-        setMensagem(`Macro adicionada com sucesso! ID: ${response.id}`);
+        setMensagem(`Macro adicionada com sucesso! ID: ${response.id}`)
       } else {
-        setMensagem(`Erro: ${response.error}`);
+        setMensagem(`Erro: ${response.error}`)
       }
-    });
+    })
     toast('Macro criado com sucesso!')
     setStatusMacro((prev) => !prev)
+    getMacros()
   }
   const onCancel = (): void => {
     setStatusMacro((prev) => !prev)
@@ -71,17 +64,18 @@ function App(): JSX.Element {
       </div>
       <div id="container-macros" className="">
         {!statusMacro ? (
-          macro?.length ?
+          macro?.length ? (
             macro.map((m) => (
               <div key={m.id}>
                 <ItemMacro title={m.title} id={m.id} />
               </div>
             ))
-            :
-            <p>Nenhum macro encontrado</p>)
-          : (
-            <CreateMacro sts={statusMacro} onSubmit={onSubmit} onCancel={onCancel} />
-          )}
+          ) : (
+            <p>Nenhum macro encontrado</p>
+          )
+        ) : (
+          <CreateMacro sts={statusMacro} onSubmit={onSubmit} onCancel={onCancel} />
+        )}
         <ToastContainer
           position="bottom-right"
           autoClose={1000}
