@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { db, createTable, getAllMacro, getMacroById } from './db/db'
+import { db, createTable, getAllMacro, getMacroById, deleteMacroById } from './db/db'
 
 function createWindow(): void {
   // Create the browser window.
@@ -34,6 +34,11 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
+  ipcMain.on('delete-macro', (event, id) => {
+    console.log(id)
+    console.log('tentativa de delete')
+    deleteMacroById(id)
+  })
   ipcMain.on('close-window', () => mainWindow.close())
   ipcMain.on('minimize-window', () => mainWindow.minimize())
   ipcMain.on('maximize-window', (_event, res) => mainWindow.setFullScreen(res))
@@ -52,6 +57,22 @@ function createWindow(): void {
         event.reply('add-macro-response', { success: true, id: this.lastID })
       }
     })
+  })
+  ipcMain.on('edit-macro', (event, data) => {
+    const { title, message, id } = data
+
+    db.run(
+      'UPDATE macro SET (title, message) = (?, ?) WHERE id = ?',
+      [title, message, id],
+      function (err) {
+        if (err) {
+          console.error('Erro ao editar macro:', err.message)
+          event.reply('add-macro-response', { success: false, error: err.message })
+        } else {
+          console.log('Macro editar com ID:', this.lastID)
+          event.reply('add-macro-response', { success: true, id: this.lastID })
+        }
+      })
   })
 }
 

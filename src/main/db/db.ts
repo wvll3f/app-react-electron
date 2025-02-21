@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path'
+import { title } from 'process'
 import sqlite3 from 'sqlite3'
 
 type requestMacro = {
@@ -53,6 +55,29 @@ export const getMacroById = async (id): Promise<any> => {
   const sql = 'SELECT * FROM macro WHERE id = ?'
   return new Promise<any>((resolve, reject) => {
     db.get(sql, id, (err, row) => {
+      if (err) reject(err)
+      resolve(row)
+    })
+  })
+}
+export const deleteMacroById = async (id): Promise<any> => {
+  const sql = `DELETE FROM macro WHERE id = ?`
+  return new Promise<any>((resolve, reject) => {
+    db.run(sql, id, (err, row) => {
+      if (err) reject(err)
+      resolve(row)
+    })
+  })
+}
+export const updateMacroById = async (title, message, id): Promise<any> => {
+  const sql = `UPDATE macro SET (title, message) = (?, ?) WHERE id = ?`
+  const data = {
+    title: title,
+    message: message,
+    id: id
+  }
+  return new Promise<any>((resolve, reject) => {
+    db.run(sql, { title, message, id }, (err, row) => {
       if (err) reject(err)
       resolve(row)
     })

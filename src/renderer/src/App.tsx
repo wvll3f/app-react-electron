@@ -3,7 +3,7 @@ import CreateMacro from './components/CreateMacro'
 import ItemMacro from './components/ItemMacro'
 import TopBar from './components/TopBar'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
-import EditMacro from './components/EditMacro'
+//import EditMacro from './components/EditMacro'
 
 type Macro = {
   id: number
@@ -21,10 +21,6 @@ function App(): JSX.Element {
   const getMacros = (): void => {
     window.electron.ipcRenderer.invoke('get-macros').then(setMacro).catch(console.error)
   }
-  useEffect(() => {
-    getMacros()
-  }, [])
-
   const newMacro = (): void => {
     setStatusMacro((prev) => !prev)
     setItemsMacro('ss')
@@ -50,6 +46,15 @@ function App(): JSX.Element {
   const onCancel = (): void => {
     setStatusMacro((prev) => !prev)
   }
+  const onDelete = (id): void => {
+    window.electron.ipcRenderer.send('delete-macro', id)
+    getMacros()
+    toast(`Macro ${id} deletado com sucesso`)
+  }
+
+  useEffect(() => {
+    getMacros()
+  }, [])
 
   return (
     <div id="main-container" className="h-[100dvh] bg-gray-800 text-gray-300">
@@ -67,7 +72,7 @@ function App(): JSX.Element {
           macro?.length ? (
             macro.map((m) => (
               <div key={m.id}>
-                <ItemMacro title={m.title} id={m.id} />
+                <ItemMacro onDelete={() => onDelete(m.id)} title={m.title} id={m.id} />
               </div>
             ))
           ) : (
