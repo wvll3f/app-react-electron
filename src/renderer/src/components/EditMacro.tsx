@@ -1,14 +1,14 @@
-import { useState } from "react"
+import { useState } from 'react'
 
 type EditMacroProps = {
   onSubmit: () => void
   onCancel: () => void
-  sts: boolean
+  //sts: boolean
   resTitle: string
   resMessage: string
 }
 
-function EditMacro({ onSubmit, onCancel, sts, resTitle, resMessage }: EditMacroProps): JSX.Element {
+function EditMacro({ onSubmit, onCancel, resTitle, resMessage }: EditMacroProps): JSX.Element {
   const [title, setTitle] = useState(resTitle)
   const [message, setMessage] = useState(resMessage)
   const [messagem, setMessagem] = useState('')
@@ -18,7 +18,7 @@ function EditMacro({ onSubmit, onCancel, sts, resTitle, resMessage }: EditMacroP
       title: title,
       message: message
     }
-    window.electron.ipcRenderer.send('add-macro', query)
+    window.electron.ipcRenderer.send('edit-macro', query)
 
     window.electron.ipcRenderer.once('add-macro-response', (_event, response) => {
       if (response.success) {

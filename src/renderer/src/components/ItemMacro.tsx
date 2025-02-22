@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FaClipboard, FaTrash } from 'react-icons/fa6'
 import EditMacro from './EditMacro'
+import { toast, ToastContainer } from 'react-toastify'
 
 type itemProps = {
   title: string
@@ -18,8 +19,11 @@ function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
   const [editMacro, setEditMacro] = useState<MacroRes>(null)
 
   const getMacroById = (id): void => {
-    window.electron.ipcRenderer.invoke('get-macro-id', id).then(setEditMacro).catch(console.error)
-    console.log(editMacro.message)
+    window.electron.ipcRenderer
+      .invoke('get-macro-id', id)
+      .then(setEditMacro)
+      .catch((error) => toast(error))
+    console.log(editMacro)
   }
   // const [text, setText] = useState("Texto para copiar")
   // const [copied, setCopied] = useState(false)
@@ -38,11 +42,10 @@ function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
     <>
       {selected ? (
         <EditMacro
-          sts={false}
           onCancel={() => setSelected(false)}
           onSubmit={() => setSelected(false)}
-          resTitle={'editMacro.title'}
-          resMessage={'editMacro.message'}
+          resTitle={editMacro.title}
+          resMessage={editMacro.message}
         />
       ) : (
         <li className="flex px-4 text-xl border-b-1 p-2 border-gray-500 gap-3 items-center">
@@ -51,7 +54,8 @@ function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
               getMacroById(id)
               setSelected(true)
             }}
-            className="text-2xl font-bold tracking-wide cursor-pointer flex-1" id={id.toString()}
+            className="text-2xl font-bold tracking-wide cursor-pointer flex-1"
+            id={id.toString()}
           >
             {title}
           </h3>
@@ -66,6 +70,7 @@ function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
           </section>
         </li>
       )}
+      <ToastContainer />
     </>
   )
 }

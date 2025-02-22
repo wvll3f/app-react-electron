@@ -44,7 +44,7 @@ function createWindow(): void {
   ipcMain.on('maximize-window', (_event, res) => mainWindow.setFullScreen(res))
   ipcMain.on('on-top-window', (_event, res) => mainWindow.setAlwaysOnTop(res))
   ipcMain.handle('get-macros', async () => getAllMacro())
-  ipcMain.handle('get-macro-id', async (_event, id) => getMacroById(id))
+  ipcMain.handle('get-macro-id', async (_event, id) => await getMacroById(id))
   ipcMain.on('add-macro', (event, macro) => {
     const { title, message } = macro
 
@@ -67,10 +67,10 @@ function createWindow(): void {
       function (err) {
         if (err) {
           console.error('Erro ao editar macro:', err.message)
-          event.reply('add-macro-response', { success: false, error: err.message })
+          event.reply('edit-macro-response', { success: false, error: err.message })
         } else {
           console.log('Macro editar com ID:', this.lastID)
-          event.reply('add-macro-response', { success: true, id: this.lastID })
+          event.reply('edit-macro-response', { success: true, id: this.lastID })
         }
       })
   })

@@ -56,7 +56,7 @@ export const getMacroById = async (id): Promise<any> => {
   return new Promise<any>((resolve, reject) => {
     db.get(sql, id, (err, row) => {
       if (err) reject(err)
-      resolve(row)
+      return resolve(row)
     })
   })
 }

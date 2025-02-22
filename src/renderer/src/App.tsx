@@ -76,7 +76,7 @@ function App(): JSX.Element {
               </div>
             ))
           ) : (
-            <p>Nenhum macro encontrado</p>
+            <p className='p-3'>Nenhum macro encontrado</p>
           )
         ) : (
           <CreateMacro sts={statusMacro} onSubmit={onSubmit} onCancel={onCancel} />
