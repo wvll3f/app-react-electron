@@ -1,20 +1,29 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react'
 
 type EditMacroProps = {
   onSubmit: () => void
   onCancel: () => void
-  //sts: boolean
+  resId: number
   resTitle: string
   resMessage: string
 }
 
-function EditMacro({ onSubmit, onCancel, resTitle, resMessage }: EditMacroProps): JSX.Element {
+function EditMacro({
+  onSubmit,
+  onCancel,
+  resId,
+  resTitle,
+  resMessage
+}: EditMacroProps): JSX.Element {
+  const [id] = useState(resId) // Remove `setId`
   const [title, setTitle] = useState(resTitle)
   const [message, setMessage] = useState(resMessage)
   const [messagem, setMessagem] = useState('')
 
-  const onEdit = (title, message): void => {
+  const onEdit = async (title: string, message: string, id: number): Promise<void> => {
     const query = {
+      id: id,
       title: title,
       message: message
     }
@@ -23,8 +32,10 @@ function EditMacro({ onSubmit, onCancel, resTitle, resMessage }: EditMacroProps)
     window.electron.ipcRenderer.once('add-macro-response', (_event, response) => {
       if (response.success) {
         setMessagem(`Macro adicionada com sucesso! ID: ${response.id}`)
+        console.log(messagem)
       } else {
         setMessagem(`Erro: ${response.error}`)
+        console.log(messagem)
       }
     })
   }
@@ -53,8 +64,9 @@ function EditMacro({ onSubmit, onCancel, resTitle, resMessage }: EditMacroProps)
           className="font-bold w-full py-2 rounded-md bg-green-300 text-gray-800 hover:bg-green-400"
           onClick={(event) => {
             event.preventDefault()
-            onSubmit()
-            onEdit(title, message)
+            onEdit(title, message, id).then(() => {
+              onSubmit()
+            })
           }}
         >
           Enviar

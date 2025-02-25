@@ -1,15 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path'
-import { title } from 'process'
 import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
 
 type requestMacro = {
   title: string
   message: string
 }
 
-const dbPath = path.resolve(__dirname, 'macro.db')
+const dbPath = path.resolve(__dirname, '..', 'macro.db')
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export async function openDb() {
+  return open({
+    filename: dbPath,
+    driver: sqlite3.Database
+  })
+}
 
 export function createTable(): void {
   const query = `
@@ -71,13 +78,8 @@ export const deleteMacroById = async (id): Promise<any> => {
 }
 export const updateMacroById = async (title, message, id): Promise<any> => {
   const sql = `UPDATE macro SET (title, message) = (?, ?) WHERE id = ?`
-  const data = {
-    title: title,
-    message: message,
-    id: id
-  }
   return new Promise<any>((resolve, reject) => {
-    db.run(sql, { title, message, id }, (err, row) => {
+    db.run(sql, title, message, id, (err, row) => {
       if (err) reject(err)
       resolve(row)
     })

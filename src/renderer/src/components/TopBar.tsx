@@ -16,7 +16,7 @@ function TopBar(): JSX.Element {
   }
 
   return (
-    <header className="bg-gray-900 w-full h-10 px-5 flex items-center justify-center">
+    <header className="bg-gray-900 w-full h-10 p-5 flex items-center justify-center">
       <button onClick={ipcOnTopWindow} className="w-4 h-4 rounded-full bg-gray-500"></button>
       <span className=" text-center text-gray-200 opacity-50 flex-1">Macrobox</span>
       <nav className="flex gap-2 items-center">

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react'
 import { FaClipboard, FaTrash } from 'react-icons/fa6'
 import EditMacro from './EditMacro'
@@ -16,52 +17,67 @@ type MacroRes = {
 
 function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
   const [selected, setSelected] = useState(false)
-  const [editMacro, setEditMacro] = useState<MacroRes>(null)
+  const [editMacro, setEditMacro] = useState<MacroRes>({} as MacroRes)
+  const [text, setText] = useState('')
+  const [, setCopied] = useState(false) // Remove `copied`
 
-  const getMacroById = (id): void => {
+  async function getMacroById(id): Promise<void> {
     window.electron.ipcRenderer
       .invoke('get-macro-id', id)
-      .then(setEditMacro)
+      .then((res) => {
+        setEditMacro(res)
+        setSelected(true)
+      })
       .catch((error) => toast(error))
-    console.log(editMacro)
   }
-  // const [text, setText] = useState("Texto para copiar")
-  // const [copied, setCopied] = useState(false)
-
-  // const copyToClipboard = async () => {
-  //   try {
-  //     await navigator.clipboard.writeText(text)
-  //     setCopied(true);
-  //     setTimeout(() => setCopied(false), 1000)
-  //   } catch (err) {
-  //     console.error("Falha ao copiar!", err)
-  //   }
-  // }
+  async function getCopyMacro(id: number): Promise<void> {
+    window.electron.ipcRenderer
+      .invoke('get-macro-id', id)
+      .then((res: MacroRes) => {
+        setText(res.message)
+      })
+      .catch((error) => toast(error))
+  }
+  async function copyToClipboard(id: number): Promise<void> {
+    try {
+      await getCopyMacro(id)
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      toast('Copiado com sucesso!', { theme: 'dark', type: 'success' })
+      setTimeout(() => setCopied(false), 1000)
+    } catch (err) {
+      console.error('Falha ao copiar!', err)
+    }
+  }
 
   return (
-    <>
+    <div className="">
       {selected ? (
-        <EditMacro
-          onCancel={() => setSelected(false)}
-          onSubmit={() => setSelected(false)}
-          resTitle={editMacro.title}
-          resMessage={editMacro.message}
-        />
+        <div className="">
+          <EditMacro
+            onCancel={() => setSelected(false)}
+            onSubmit={() => {
+              setSelected(false)
+            }}
+            resId={editMacro.id}
+            resTitle={editMacro.title}
+            resMessage={editMacro.message}
+          />
+        </div>
       ) : (
-        <li className="flex px-4 text-xl border-b-1 p-2 border-gray-500 gap-3 items-center">
+        <li className="flex px-4 text-xl border-b-1 select-none p-2 border-gray-500 gap-3 items-center hover:bg-gray-900">
           <h3
             onClick={() => {
               getMacroById(id)
-              setSelected(true)
             }}
-            className="text-2xl font-bold tracking-wide cursor-pointer flex-1"
+            className="text-xl font-bold tracking-wide cursor-pointer flex-1"
             id={id.toString()}
           >
             {title}
           </h3>
           <section className="flex gap-5">
             <button id={id.toString()}>
-              <FaClipboard width={16} />
+              <FaClipboard onClick={async () => copyToClipboard(id)} width={16} />
             </button>
             <div className="h-8 w-0.5 bg-gray-500"></div>
             <button onClick={onDelete} id={id.toString()}>
@@ -70,8 +86,8 @@ function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
           </section>
         </li>
       )}
-      <ToastContainer />
-    </>
+      <ToastContainer theme="dark" />
+    </div>
   )
 }
 
