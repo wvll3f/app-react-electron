@@ -31,12 +31,15 @@ function ItemMacro({ title, id, onDelete }: itemProps): JSX.Element {
       .catch((error) => toast(error))
   }
   async function getCopyMacro(id: number): Promise<void> {
-    window.electron.ipcRenderer
-      .invoke('get-macro-id', id)
-      .then((res: MacroRes) => {
-        setText(res.message)
-      })
-      .catch((error) => toast(error))
+    const callback = async (): Promise<void> => {
+      window.electron.ipcRenderer
+        .invoke('get-macro-id', id)
+        .then((res: MacroRes) => {
+          setText(res.message)
+        })
+        .catch((error) => toast(error))
+    }
+    callback()
   }
   async function copyToClipboard(id: number): Promise<void> {
     try {

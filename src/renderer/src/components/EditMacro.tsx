@@ -21,14 +21,10 @@ function EditMacro({
   const [message, setMessage] = useState(resMessage)
   const [messagem, setMessagem] = useState('')
 
-  const onEdit = async (title: string, message: string, id: number): Promise<void> => {
-    const query = {
-      id: id,
-      title: title,
-      message: message
-    }
+  async function callEdit(query): Promise<void> {
     window.electron.ipcRenderer.send('edit-macro', query)
-
+  }
+  async function responseEdit(): Promise<void> {
     window.electron.ipcRenderer.once('add-macro-response', (_event, response) => {
       if (response.success) {
         setMessagem(`Macro adicionada com sucesso! ID: ${response.id}`)
@@ -38,6 +34,16 @@ function EditMacro({
         console.log(messagem)
       }
     })
+  }
+
+  const onEdit = async (title: string, message: string, id: number): Promise<void> => {
+    const query = {
+      id: id,
+      title: title,
+      message: message
+    }
+    await callEdit(query)
+    await responseEdit()
   }
 
   return (
@@ -54,7 +60,7 @@ function EditMacro({
       <label className="font-bold">Macro:</label>
       <textarea
         required={true}
-        className="bg-gray-800 w-full resize-none border-none p-2 h-48 outline-none rounded-md"
+        className="bg-gray-800 w-full resize-none border-none p-2 h-48 outline-none rounded-md scrollbar-custom"
         name="message"
         onChange={(e) => setMessage(e.target.value)}
         value={message}
@@ -69,7 +75,7 @@ function EditMacro({
             })
           }}
         >
-          Enviar
+          Editar
         </button>
         <button
           className="font-bold w-full py-2 rounded-md bg-red-300 text-gray-800 hover:bg-red-400"

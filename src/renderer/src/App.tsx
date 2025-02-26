@@ -3,7 +3,6 @@ import CreateMacro from './components/CreateMacro'
 import ItemMacro from './components/ItemMacro'
 import TopBar from './components/TopBar'
 import { toast, ToastContainer } from 'react-toastify'
-//import EditMacro from './components/EditMacro'
 
 type Macro = {
   id: number
@@ -17,7 +16,7 @@ function App(): JSX.Element {
   const [macro, setMacro] = useState<Macro[] | null>(null)
   const [mesagem, setMensagem] = useState('')
 
-  const getMacros = (): void => {
+  async function getMacros(): Promise<void> {
     window.electron.ipcRenderer
       .invoke('get-macros')
       .then((res) => {
@@ -58,7 +57,6 @@ function App(): JSX.Element {
     getMacros()
     toast('Macro deletada com sucesso!', { theme: 'dark', type: 'success' })
   }
-
   useEffect(() => {
     getMacros()
   }, [macro])
